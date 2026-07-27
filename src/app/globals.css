@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Design system repris à l'identique de Suivi Leads Project (mêmes tokens),
+   avec des composants propres à cette app de reporting.
+   ========================================================================= */
+:root {
+  --surface-2: #ffffff;
+  --surface-1: #F1EFE8;
+  --surface-0: #F1EFE8;
+  --text-primary: #2A2420;
+  --text-secondary: #6B6157;
+  --text-muted: #9C9186;
+  --border: #E7E0D3;
+  --border-strong: #D9C9AE;
+  --bg-accent: #F1E6D2;
+  --text-accent: #8B6F4E;
+  --bg-danger: #FCEBEB;
+  --text-danger: #A32D2D;
+  --bg-success: #EAF3DE;
+  --text-success: #3B6D11;
+  --text-amber: #854F0B;
+  --gold-50: #FBF6EC;
+  --gold-100: #F3E7D0;
+  --gold-300: #D9C4A0;
+  --gold-500: #B0977C;
+  --gold-700: #8B6F4E;
+  --radius: 10px;
+  --radius-card: 16px;
+  --shadow-card: 0 1px 2px rgba(21,57,51,0.06), 0 8px 24px -10px rgba(21,57,51,0.14);
+  --font-sans-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-serif-fallback: Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: auto; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  font-family: var(--font-sans), var(--font-sans-fallback);
+  color: var(--text-primary);
+  padding: 2rem 1rem 4rem;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; }
+h1 { font-family: var(--font-serif), var(--font-serif-fallback); font-size: 24px; font-weight: 600; letter-spacing: 0.2px; margin: 0 0 4px; }
+h2 { font-family: var(--font-serif), var(--font-serif-fallback); font-size: 17px; font-weight: 600; margin: 2.25rem 0 0.85rem; color: var(--text-primary); }
+p.sub { font-size: 13px; color: var(--text-secondary); margin: 0 0 1.5rem; }
+select, input, button {
+  font-family: var(--font-sans), var(--font-sans-fallback);
+  font-size: 14px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-strong);
+  padding: 8px 10px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+button { cursor: pointer; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button:not(:disabled):hover { filter: brightness(0.97); }
+button:not(:disabled):active { transform: translateY(1px); }
+
+.header-card {
+  margin-bottom: 1.1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: var(--shadow-card);
+  border-bottom: 2.5px solid var(--gold-300);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.header-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.header-logo { width: 38px; height: 38px; border-radius: 50%; flex: none; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.18); }
+.header-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.header-card h1 { font-size: 16.5px; margin: 0; line-height: 1.15; }
+.header-card .sub-label { font-size: 11.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin: 3px 0 0; }
+
+.step-title {
+  font-family: var(--font-fraunces), serif; font-size: 14.5px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em; color: #153933;
+  margin: 0 0 12px 4px;
+}
+
+.panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 1.1rem 1.25rem; box-shadow: var(--shadow-card); margin-bottom: 1.5rem; }
+
+.filters-row { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.filter-field { display: flex; flex-direction: column; gap: 5px; }
+.filter-field label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.preset-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.preset-btn { font-size: 12.5px; padding: 7px 13px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-weight: 600; }
+.preset-btn.active { background: var(--gold-500); border-color: var(--gold-500); color: #fff; }
+.export-row { margin-left: auto; display: flex; gap: 8px; }
+.btn-export { background: #16342B; color: #fff; border: none; font-weight: 600; font-size: 13px; padding: 9px 16px; border-radius: 9px; }
+.btn-export:not(:disabled):hover { background: #1f4638; }
+.btn-export.secondary { background: var(--gold-500); }
+
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-accent); color: var(--text-accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; font-family: var(--font-serif), var(--font-serif-fallback); flex: none; box-shadow: inset 0 0 0 1px rgba(139,111,78,0.15); }
+.rank-1 { color: var(--text-amber); }
+
+/* ---------- Fiches individuelles (une "table" par employé) ---------- */
+.person-summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.person-summary-card {
+  display: flex; flex-direction: column; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden;
+}
+.person-summary-card.is-top { border-color: var(--gold-500); box-shadow: 0 1px 2px rgba(21,57,51,0.06), 0 10px 26px -10px rgba(176,151,124,0.45); }
+.person-summary-card.is-totals { background: var(--gold-50); border-color: var(--gold-300); }
+.person-summary-head {
+  display: flex; align-items: center; gap: 10px; padding: 13px 16px 12px;
+  background: linear-gradient(180deg, var(--gold-50), var(--surface-2)); border-bottom: 2px solid var(--gold-300);
+}
+.person-summary-card.is-totals .person-summary-head { background: transparent; border-bottom-color: var(--gold-500); }
+.person-summary-name { font-family: var(--font-serif), var(--font-serif-fallback); font-weight: 700; font-size: 15px; color: var(--text-primary); flex: 1; }
+.person-summary-head .rank-1 { font-size: 15px; }
+.person-summary-stats { padding: 2px 16px; }
+.person-summary-stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.person-summary-stat:last-child { border-bottom: none; }
+.person-summary-stat .stat-label { color: var(--text-secondary); }
+.person-summary-stat .stat-value { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); font-size: 13px; white-space: nowrap; }
+.person-summary-stat.is-highlight { margin-top: 2px; padding-top: 11px; border-top: 1.5px solid var(--gold-500); border-bottom: none; }
+.person-summary-stat.is-highlight .stat-label { color: var(--text-accent); font-weight: 600; }
+.person-summary-stat.is-highlight .stat-value { font-size: 16px; color: var(--gold-700); }
+.person-summary-remark { padding: 12px 16px 16px; margin-top: auto; }
+.person-summary-remark label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+.remark-input {
+  width: 100%; resize: vertical; min-height: 44px; font-size: 12.5px; line-height: 1.4;
+  padding: 7px 10px; color: var(--text-primary); background: var(--gold-50);
+  border: 1px solid var(--border); border-radius: 9px; font-family: var(--font-sans), var(--font-sans-fallback);
+}
+.remark-input::placeholder { color: var(--text-muted); }
+.remark-input:focus { outline: none; border-color: var(--gold-500); background: var(--surface-2); }
+
+.chart-panel .step-title { margin-bottom: 4px; }
+
+.error-banner { background: var(--bg-danger); color: var(--text-danger); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; }
+.loading-note { font-size: 12.5px; color: var(--text-muted); padding: 6px 2px; }
+
+.pearl { border-radius: 999px; background: linear-gradient(180deg, #ffffff 0%, var(--gold-50) 100%); border: 1px solid var(--gold-300); padding: 18px 12px; text-align: center; box-shadow: 0 4px 14px rgba(139, 111, 78, 0.12), inset 0 1px 0 rgba(255,255,255,0.6); }
+.pearl-logo { width: 140px; height: 140px; border-radius: 50%; padding: 0; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(255,255,255,0.4); border: 3px solid var(--gold-300); }
+.pearl-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
