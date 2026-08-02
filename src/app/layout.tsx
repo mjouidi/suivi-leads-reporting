@@ -22,7 +22,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Rapports — Suivi Leads Dentakay",
-  description: "Rapports de performance par employé",
+  description: "Rapports de performance par Sales",
 };
 
 export default function RootLayout({
@@ -32,12 +32,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${playfair.variable} ${fraunces.variable} ${inter.variable}`}>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

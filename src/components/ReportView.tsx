@@ -2,19 +2,31 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { rangeForPreset, todayISO, type DateRange, type RangePreset } from '@/lib/dateRange';
-import { fetchPeriodReport, type PeriodReport } from '@/lib/report';
+import {
+  nDayPresetSpan,
+  rangeForPreset,
+  shiftRangeBackOneDay,
+  todayISO,
+  type DateRange,
+  type RangePreset,
+} from '@/lib/dateRange';
+import {
+  computeRankMovement,
+  explicationTargetForPreset,
+  fetchPeriodReport,
+  type PeriodReport,
+  type RankMovement,
+} from '@/lib/report';
 import type { Profile } from '@/lib/database.types';
 import { DateRangeFilter } from '@/components/DateRangeFilter';
 import { EmployeeFilter } from '@/components/EmployeeFilter';
 import { PersonSummaryTable } from '@/components/PersonSummaryTable';
-import { LeadsByEmployeeChart } from '@/components/LeadsByEmployeeChart';
 
-async function downloadExport(path: string, range: DateRange, personIds: string[] | null) {
+async function downloadExport(path: string, range: DateRange, personIds: string[] | null, preset: RangePreset) {
   const res = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: range.from, to: range.to, personIds }),
+    body: JSON.stringify({ from: range.from, to: range.to, personIds, preset }),
   });
   if (!res.ok) throw new Error("Échec de l'export.");
   const blob = await res.blob();
@@ -45,6 +57,7 @@ export function ReportView({
   const [customTo, setCustomTo] = useState(todayISO());
   const [selectedIds, setSelectedIds] = useState<string[] | null>(null);
   const [report, setReport] = useState<PeriodReport>(initialReport);
+  const [movement, setMovement] = useState<Record<string, RankMovement>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null);
@@ -63,6 +76,16 @@ export function ReportView({
       const supabase = createClient();
       const next = await fetchPeriodReport(supabase, range, nextIds ?? undefined);
       setReport(next);
+
+      // Flèches de progression : uniquement pour les filtres "N derniers jours"
+      // (Aujourd'hui à 6 Jours), comparées à la même plage décalée d'un jour en arrière.
+      if (nDayPresetSpan(nextPreset) !== null) {
+        const comparisonRange = shiftRangeBackOneDay(range);
+        const comparison = await fetchPeriodReport(supabase, comparisonRange, nextIds ?? undefined);
+        setMovement(computeRankMovement(next.people, comparison.people));
+      } else {
+        setMovement({});
+      }
     } catch {
       setError('Impossible de charger le rapport. Réessayez.');
     } finally {
@@ -90,7 +113,7 @@ export function ReportView({
     setExporting(kind);
     setError(null);
     try {
-      await downloadExport(`/api/export/${kind}`, currentRange(), selectedIds);
+      await downloadExport(`/api/export/${kind}`, currentRange(), selectedIds, preset);
     } catch {
       setError("Échec de l'export. Réessayez.");
     } finally {
@@ -111,7 +134,7 @@ export function ReportView({
             <img src="/brand/header-logo.png" alt="Dentakay" />
           </div>
           <div>
-            <h1>Rapports — Performance par employé</h1>
+            <h1>Rapports — Performance par Sales</h1>
             <p className="sub-label">Suivi des leads</p>
           </div>
         </div>
@@ -138,13 +161,16 @@ export function ReportView({
         {loading && <p className="loading-note">Chargement…</p>}
       </div>
 
-      <LeadsByEmployeeChart people={report.people} />
-
       <div className="panel" style={{ marginTop: '1.5rem' }}>
         <h3 className="step-title" style={{ marginTop: 0 }}>
-          Détail par employé — {report.range.from} → {report.range.to}
+          Détail par Sales — {report.range.from} → {report.range.to}
         </h3>
-        <PersonSummaryTable people={report.people} remarks={remarks} />
+        <PersonSummaryTable
+          people={report.people}
+          remarks={remarks}
+          movement={movement}
+          explicationTarget={explicationTargetForPreset(preset)}
+        />
       </div>
     </div>
   );

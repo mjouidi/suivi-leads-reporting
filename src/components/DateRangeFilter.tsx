@@ -19,7 +19,9 @@ export function DateRangeFilter({
     <div className="filter-field">
       <label>Période</label>
       <div className="preset-group">
-        {(['today', 'week', 'month', 'custom'] as const).map((p) => (
+        {(
+          ['today', 'yesterday', 'twoDays', 'threeDays', 'fourDays', 'fiveDays', 'sixDays', 'week', 'month', 'custom'] as const
+        ).map((p) => (
           <button
             key={p}
             type="button"

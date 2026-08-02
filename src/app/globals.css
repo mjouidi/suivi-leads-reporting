@@ -19,7 +19,19 @@
   --text-danger: #A32D2D;
   --bg-success: #EAF3DE;
   --text-success: #3B6D11;
+  --border-success: #97C459;
+  --bg-info: #E7F0FA;
+  --text-info: #1F5C99;
+  --border-info: #A9C7E8;
+  --bg-violet: #F1EAFB;
+  --text-violet: #6B3FA0;
+  --border-violet: #D3B8F0;
+  --bg-teal: #E3F3F0;
+  --text-teal: #146B5C;
+  --border-teal: #9FD6C9;
+  --bg-amber: #FAEEDA;
   --text-amber: #854F0B;
+  --border-amber: #E8B85A;
   --gold-50: #FBF6EC;
   --gold-100: #F3E7D0;
   --gold-300: #D9C4A0;
@@ -100,38 +112,97 @@ button:not(:disabled):active { transform: translateY(1px); }
 .btn-export:not(:disabled):hover { background: #1f4638; }
 .btn-export.secondary { background: var(--gold-500); }
 
-.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-accent); color: var(--text-accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; font-family: var(--font-serif), var(--font-serif-fallback); flex: none; box-shadow: inset 0 0 0 1px rgba(139,111,78,0.15); }
-.rank-1 { color: var(--text-amber); }
+/* ---------- Tableau de classement (même structure/couleurs que le PDF) ---------- */
+.ranking-table-wrap {
+  overflow-x: auto; border-radius: var(--radius-card); border: 1.5px solid var(--border-strong);
+  box-shadow: var(--shadow-card);
+}
+.ranking-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+.ranking-table thead th {
+  background: #153933; color: var(--gold-300); text-align: left;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 8px 12px; white-space: nowrap;
+}
+.ranking-table thead th:first-child { color: #fff; }
+.ranking-table thead th.num { text-align: center; }
+.ranking-table tbody td { padding: 4px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+.ranking-table tbody td.num { text-align: center; }
+.ranking-row.is-stripe td { background: var(--gold-50); }
 
-/* ---------- Fiches individuelles (une "table" par employé) ---------- */
-.person-summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
-.person-summary-card {
-  display: flex; flex-direction: column; background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden;
+/* Top 3 du classement : or / argent / bronze (liseré + accents). */
+.ranking-row.is-rank-1 .ranking-name-cell { border-left: 3px solid #E6B51A; }
+.ranking-row.is-rank-2 .ranking-name-cell { border-left: 3px solid #9AA3AE; }
+.ranking-row.is-rank-3 .ranking-name-cell { border-left: 3px solid #B8733A; }
+/* 3 derniers du classement : rouge (dernier) -> orange (3e en partant de la fin). */
+.ranking-row.is-bottom-1 .ranking-name-cell { border-left: 3px solid #A32D2D; }
+.ranking-row.is-bottom-2 .ranking-name-cell { border-left: 3px solid #C0392B; }
+.ranking-row.is-bottom-3 .ranking-name-cell { border-left: 3px solid #E08E28; }
+
+.ranking-name-cell { min-width: 190px; }
+.ranking-name-row { display: flex; align-items: center; gap: 6px; }
+.ranking-name { font-family: var(--font-serif), var(--font-serif-fallback); font-weight: 700; font-size: 13px; color: var(--text-primary); }
+.ranking-rank-label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 1px; }
+.ranking-rank-label.rank-1 { color: #A5790A; }
+.ranking-rank-label.rank-2 { color: #6E7680; }
+.ranking-rank-label.rank-3 { color: #954E1C; }
+.ranking-rank-label.bottom-1 { color: #A32D2D; }
+.ranking-rank-label.bottom-2 { color: #C0392B; }
+.ranking-rank-label.bottom-3 { color: #B8701A; }
+/* Pastille "médaille" (top 3, numérotée) / "alerte" (3 derniers, "!") — formes CSS pures. */
+.ranking-medal {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 17px; height: 17px; border-radius: 50%; color: #fff; font-size: 10px; font-weight: 800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
-.person-summary-card.is-top { border-color: var(--gold-500); box-shadow: 0 1px 2px rgba(21,57,51,0.06), 0 10px 26px -10px rgba(176,151,124,0.45); }
-.person-summary-card.is-totals { background: var(--gold-50); border-color: var(--gold-300); }
-.person-summary-head {
-  display: flex; align-items: center; gap: 10px; padding: 13px 16px 12px;
-  background: linear-gradient(180deg, var(--gold-50), var(--surface-2)); border-bottom: 2px solid var(--gold-300);
+.ranking-medal.rank-1 { background: linear-gradient(150deg, #F2C94C, #A5790A); }
+.ranking-medal.rank-2 { background: linear-gradient(150deg, #C2C9D1, #6E7680); }
+.ranking-medal.rank-3 { background: linear-gradient(150deg, #CD8A52, #954E1C); }
+.ranking-medal.bottom-1 { background: linear-gradient(150deg, #E0685C, #A32D2D); }
+.ranking-medal.bottom-2 { background: linear-gradient(150deg, #D9724F, #C0392B); }
+.ranking-medal.bottom-3 { background: linear-gradient(150deg, #EFAF63, #B8701A); }
+
+/* Flèche dessinée en CSS (triangle par bordures) avec un léger relief — pas de police d'icônes externe. */
+.rank-movement-arrow { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.rank-movement-arrow-shape {
+  display: block; width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
 }
-.person-summary-card.is-totals .person-summary-head { background: transparent; border-bottom-color: var(--gold-500); }
-.person-summary-name { font-family: var(--font-serif), var(--font-serif-fallback); font-weight: 700; font-size: 15px; color: var(--text-primary); flex: 1; }
-.person-summary-head .rank-1 { font-size: 15px; }
-.person-summary-stats { padding: 2px 16px; }
-.person-summary-stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
-.person-summary-stat:last-child { border-bottom: none; }
-.person-summary-stat .stat-label { color: var(--text-secondary); }
-.person-summary-stat .stat-value { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); font-size: 13px; white-space: nowrap; }
-.person-summary-stat.is-highlight { margin-top: 2px; padding-top: 11px; border-top: 1.5px solid var(--gold-500); border-bottom: none; }
-.person-summary-stat.is-highlight .stat-label { color: var(--text-accent); font-weight: 600; }
-.person-summary-stat.is-highlight .stat-value { font-size: 16px; color: var(--gold-700); }
-.person-summary-remark { padding: 12px 16px 16px; margin-top: auto; }
-.person-summary-remark label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
+.rank-movement-arrow-shape.rank-movement-arrow-up {
+  border-bottom: 8px solid #4C8A1D; filter: drop-shadow(0 1.5px 1.5px rgba(59,109,17,0.5));
+}
+.rank-movement-arrow-shape.rank-movement-arrow-down {
+  border-top: 8px solid #C0392B; filter: drop-shadow(0 1.5px 1.5px rgba(163,45,45,0.5));
+}
+
+.rt-pill {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 40px;
+  padding: 3px 9px; border-radius: 999px; font-family: var(--font-mono); font-weight: 700; font-size: 12px;
+}
+.rt-pill.is-hero { padding: 4px 12px; font-size: 13.5px; font-weight: 800; }
+.rt-pill.tone-success { background: var(--bg-success); color: var(--text-success); }
+.rt-pill.tone-danger { background: var(--bg-danger); color: var(--text-danger); }
+.rt-pill.tone-teal { background: var(--bg-teal); color: var(--text-teal); }
+
+/* Champs "objectif explication" (Msg / Appel / Nbre) : rouge foncé/vif pour bien signaler le retard ;
+   orange et vert restent des teintes très claires, pas d'alarme inutile. */
+.tier-cell { font-family: var(--font-mono); font-weight: 800; font-size: 12.5px; }
+/* Spécificité (.ranking-row td.tier-cell) volontairement plus élevée que
+   `.ranking-row.is-stripe td` pour que la couleur d'objectif l'emporte sur le zébrage. */
+.ranking-row td.tier-cell.tone-success { background: var(--bg-success); color: var(--text-success); }
+.ranking-row td.tier-cell.tone-amber { background: var(--bg-amber); color: var(--text-amber); }
+.ranking-row td.tier-cell.tone-danger { background: #C0392B; color: #FFFFFF; }
+
+.ranking-remark-cell { min-width: 230px; padding-top: 5px; padding-bottom: 5px; }
+.ranking-totals-row td {
+  background: #153933; color: #fff; font-weight: 700; font-family: var(--font-mono); font-size: 12.5px;
+  border-top: 1.5px solid var(--gold-500); padding: 7px 12px;
+}
+.ranking-totals-row td:first-child { font-family: var(--font-serif), var(--font-serif-fallback); color: var(--gold-300); text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.04em; }
+
 .remark-input {
-  width: 100%; resize: vertical; min-height: 44px; font-size: 12.5px; line-height: 1.4;
-  padding: 7px 10px; color: var(--text-primary); background: var(--gold-50);
-  border: 1px solid var(--border); border-radius: 9px; font-family: var(--font-sans), var(--font-sans-fallback);
+  width: 100%; resize: vertical; min-height: 28px; font-size: 12px; line-height: 1.35;
+  padding: 5px 9px; color: var(--text-primary); background: var(--gold-50);
+  border: 1px solid var(--border-strong); border-radius: 8px; font-family: var(--font-sans), var(--font-sans-fallback);
 }
 .remark-input::placeholder { color: var(--text-muted); }
 .remark-input:focus { outline: none; border-color: var(--gold-500); background: var(--surface-2); }

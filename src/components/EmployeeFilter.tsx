@@ -21,7 +21,7 @@ export function EmployeeFilter({
 
   return (
     <div className="filter-field">
-      <label>Employés</label>
+      <label>Sales</label>
       <div className="preset-group">
         <button type="button" className={`preset-btn ${allSelected ? 'active' : ''}`} onClick={() => onChange(null)}>
           Tous

@@ -1,15 +1,78 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, DailyEntry, Profile, TaskEntry } from '@/lib/database.types';
-import type { DateRange } from '@/lib/dateRange';
+import { nDayPresetSpan, type DateRange, type RangePreset } from '@/lib/dateRange';
 
 export interface PersonPeriodReport {
   personId: string;
   name: string;
   leadsTotal: number;
+  idleSeconds: number;
   closingSeconds: number;
   explicationParMsg: number;
   explicationParAppel: number;
+  explicationCount: number;
   remark: string;
+}
+
+/** Vert dès l'objectif atteint, orange juste en dessous, rouge en dessous de ça. */
+export function explicationTierForTarget(count: number, target: number): 'success' | 'warning' | 'danger' {
+  return count >= target ? 'success' : count === target - 1 ? 'warning' : 'danger';
+}
+
+/** Objectif par défaut de 4 explications par période (utilisé par la page web et l'export Excel). */
+export function explicationTier(count: number): 'success' | 'warning' | 'danger' {
+  return explicationTierForTarget(count, 4);
+}
+
+/**
+ * Objectif d'explications selon le filtre de période : 2/jour de plage couverte
+ * (Aujourd'hui = 2, 2 Jours = 4, ..., 6 Jours = 12) ; 4 par défaut pour les
+ * périodes où ce rythme quotidien n'a plus de sens direct (semaine/mois/hier/personnalisée).
+ */
+export function explicationTargetForPreset(preset: RangePreset): number {
+  const span = nDayPresetSpan(preset);
+  return span !== null ? span * 2 : 4;
+}
+
+/**
+ * Classement : nbre d'explication d'abord, puis explication par appel, puis
+ * leads traités, puis temps de closing (chaque critère départage l'égalité du précédent).
+ */
+export function sortByRanking(people: PersonPeriodReport[]): PersonPeriodReport[] {
+  return [...people].sort(
+    (a, b) =>
+      b.explicationCount - a.explicationCount ||
+      b.explicationParAppel - a.explicationParAppel ||
+      b.leadsTotal - a.leadsTotal ||
+      b.closingSeconds - a.closingSeconds
+  );
+}
+
+/** Position (0 = premier) de chaque personne dans le classement, pour comparer deux périodes. */
+export function rankIndexMap(people: PersonPeriodReport[]): Map<string, number> {
+  return new Map(sortByRanking(people).map((p, i) => [p.personId, i]));
+}
+
+export type RankMovement = 'up' | 'down';
+
+/**
+ * Compare le classement actuel à celui de la période précédente : "up" si la
+ * personne a gagné des places (index plus petit), "down" si elle en a perdu.
+ * Absente si la personne n'apparaît pas dans les deux classements (rien à comparer).
+ */
+export function computeRankMovement(
+  current: PersonPeriodReport[],
+  previous: PersonPeriodReport[]
+): Record<string, RankMovement> {
+  const currentRank = rankIndexMap(current);
+  const previousRank = rankIndexMap(previous);
+  const movement: Record<string, RankMovement> = {};
+  for (const [personId, rank] of currentRank) {
+    const prevRank = previousRank.get(personId);
+    if (prevRank === undefined || prevRank === rank) continue;
+    movement[personId] = rank < prevRank ? 'up' : 'down';
+  }
+  return movement;
 }
 
 export interface PeriodReport {
@@ -28,14 +91,17 @@ function buildPersonReport(profile: Profile, dailyEntries: DailyEntry[], taskEnt
   const explicationRows = taskEntries.filter((t) => t.task_key === 'explication');
   const explicationParMsg = explicationRows.reduce((sum, t) => sum + (t.explication_par_msg ?? 0), 0);
   const explicationParAppel = explicationRows.reduce((sum, t) => sum + (t.explication_par_appel ?? 0), 0);
+  const explicationCount = explicationParMsg + explicationParAppel;
 
   return {
     personId: profile.id,
     name: profile.display_name,
     leadsTotal,
+    idleSeconds: dailyEntries.reduce((sum, d) => sum + d.idle_accumulated, 0),
     closingSeconds: dailyEntries.reduce((sum, d) => sum + d.closing_accumulated, 0),
     explicationParMsg,
     explicationParAppel,
+    explicationCount,
     remark: profile.remark,
   };
 }
