@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Fraunces, Inter } from "next/font/google";
+import { PasswordRecoveryModal } from "@/components/PasswordRecoveryModal";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -32,7 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${playfair.variable} ${fraunces.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        <PasswordRecoveryModal />
+        {children}
+      </body>
     </html>
   );
 }

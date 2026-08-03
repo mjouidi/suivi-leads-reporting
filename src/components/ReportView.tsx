@@ -21,7 +21,6 @@ import type { Profile } from '@/lib/database.types';
 import { DateRangeFilter } from '@/components/DateRangeFilter';
 import { EmployeeFilter } from '@/components/EmployeeFilter';
 import { PersonSummaryTable } from '@/components/PersonSummaryTable';
-import { PasswordRecoveryModal } from '@/components/PasswordRecoveryModal';
 
 async function downloadExport(path: string, range: DateRange, personIds: string[] | null, preset: RangePreset) {
   const res = await fetch(path, {
@@ -129,7 +128,6 @@ export function ReportView({
 
   return (
     <div className="wrap">
-      <PasswordRecoveryModal />
       <div className="header-card">
         <div className="header-brand">
           <div className="header-logo">
