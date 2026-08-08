@@ -24,6 +24,25 @@ export function PasswordRecoveryModal() {
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setOpen(true);
     });
+
+    // Le SDK (configuré en mode PKCE) ne traite pas automatiquement les liens
+    // de récupération au format historique "#access_token=...&type=recovery" —
+    // on les détecte et on établit la session nous-mêmes dans ce cas.
+    const hash = window.location.hash.replace(/^#/, '');
+    const params = new URLSearchParams(hash);
+    if (params.get('type') === 'recovery') {
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        supabase.auth.setSession({ access_token, refresh_token }).then(({ error: sessionError }) => {
+          if (!sessionError) {
+            setOpen(true);
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        });
+      }
+    }
+
     return () => subscription.unsubscribe();
   }, []);
 
