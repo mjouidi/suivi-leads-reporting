@@ -10,11 +10,12 @@ import type { Profile } from '@/lib/database.types';
 const DETAIL_PRESET_KEYS = ['today', 'twoDays', 'threeDays', 'fourDays', 'fiveDays', 'sixDays'] as const;
 type DetailPreset = (typeof DETAIL_PRESET_KEYS)[number];
 
-// Objectifs de référence pour le résumé. "Modules traités" et le temps sont fixes ;
-// "Leads traités" grimpe de 100/jour couvert par la période choisie (100, 200, ..., 600).
+// Objectifs de référence pour le résumé. "Modules traités" est fixe ;
+// "Leads traités" et "Temps écoulé" grimpent par jour couvert par la période choisie
+// (leads : 100/jour ; temps : 6h30/jour, soit 13h00 pour 2 Jours, 19h30 pour 3 Jours, etc.).
 const MODULE_TARGET = 10;
 const LEADS_TARGET_PER_DAY = 100;
-const TIME_TARGET_SECONDS = 6 * 3600 + 50 * 60; // 6h50
+const TIME_TARGET_SECONDS_PER_DAY = 6 * 3600 + 30 * 60; // 6h30
 
 function tierForRatio(value: number, target: number): 'success' | 'amber' | 'danger' {
   const ratio = value / target;
@@ -63,7 +64,9 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
     { leadsCount: 0, elapsedSeconds: 0 }
   );
   const modulesTraites = rows.filter((r) => r.elapsedSeconds > 0 || r.leadsCount > 0).length;
-  const leadsTarget = (nDayPresetSpan(preset) ?? 1) * LEADS_TARGET_PER_DAY;
+  const span = nDayPresetSpan(preset) ?? 1;
+  const leadsTarget = span * LEADS_TARGET_PER_DAY;
+  const timeTargetSeconds = span * TIME_TARGET_SECONDS_PER_DAY;
 
   return (
     <div className="panel">
@@ -159,9 +162,11 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
               {totals.leadsCount} / {leadsTarget}
             </span>
           </div>
-          <div className={`detail-summary-row tone-${tierForRatio(totals.elapsedSeconds, TIME_TARGET_SECONDS)}`}>
+          <div className={`detail-summary-row tone-${tierForRatio(totals.elapsedSeconds, timeTargetSeconds)}`}>
             <span className="detail-summary-label">Temps écoulé</span>
-            <span className="detail-summary-value">{fmtHHMMSS(totals.elapsedSeconds)} / 06:50:00</span>
+            <span className="detail-summary-value">
+              {fmtHHMMSS(totals.elapsedSeconds)} / {fmtHHMMSS(timeTargetSeconds)}
+            </span>
           </div>
         </div>
       </div>
