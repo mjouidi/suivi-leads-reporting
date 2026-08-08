@@ -221,6 +221,8 @@ button:not(:disabled):active { transform: translateY(1px); }
 .detail-table thead th:first-child { color: #fff; }
 .detail-table thead th.num { text-align: center; }
 .detail-table tbody td { padding: 6px 12px; border-top: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+.detail-task-cell { display: flex; align-items: center; gap: 7px; }
+.detail-task-star { color: #E6B51A; font-size: 15px; line-height: 1; filter: drop-shadow(0 1px 1px rgba(166,120,10,0.35)); flex: none; }
 .detail-table tbody td.num { text-align: center; font-family: var(--font-mono); font-weight: 600; }
 .detail-table tbody tr.is-stripe td { background: var(--gold-50); }
 .detail-totals-row td {

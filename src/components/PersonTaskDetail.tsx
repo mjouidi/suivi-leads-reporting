@@ -47,6 +47,9 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
 
   if (profiles.length === 0) return null;
 
+  // Tâches réellement traitées en tête, triées par temps écoulé décroissant.
+  const sortedRows = [...rows].sort((a, b) => b.elapsedSeconds - a.elapsedSeconds);
+
   const totals = rows.reduce(
     (acc, r) => ({ leadsCount: acc.leadsCount + r.leadsCount, elapsedSeconds: acc.elapsedSeconds + r.elapsedSeconds }),
     { leadsCount: 0, elapsedSeconds: 0 }
@@ -103,13 +106,23 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
-              <tr key={r.taskKey} className={i % 2 === 1 ? 'is-stripe' : ''}>
-                <td>{r.label}</td>
-                <td className="num">{r.leadsCount}</td>
-                <td className="num">{fmtHHMMSS(r.elapsedSeconds)}</td>
-              </tr>
-            ))}
+            {sortedRows.map((r, i) => {
+              const treated = r.elapsedSeconds > 0 || r.leadsCount > 0;
+              return (
+                <tr key={r.taskKey} className={i % 2 === 1 ? 'is-stripe' : ''}>
+                  <td className="detail-task-cell">
+                    {treated && (
+                      <span className="detail-task-star" aria-hidden>
+                        ★
+                      </span>
+                    )}
+                    {r.label}
+                  </td>
+                  <td className="num">{r.leadsCount}</td>
+                  <td className="num">{fmtHHMMSS(r.elapsedSeconds)}</td>
+                </tr>
+              );
+            })}
           </tbody>
           <tfoot>
             <tr className="detail-totals-row">
