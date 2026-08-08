@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, DailyEntry, Profile, TaskEntry } from '@/lib/database.types';
 import { nDayPresetSpan, type DateRange, type RangePreset } from '@/lib/dateRange';
+import { ALL_TASK_KEYS, taskLabel, type TaskKey } from '@/lib/tasks';
 
 export interface PersonPeriodReport {
   personId: string;
@@ -120,6 +121,45 @@ export function buildPeriodReport(
     )
   );
   return { range, people };
+}
+
+export interface TaskBreakdownRow {
+  taskKey: TaskKey;
+  label: string;
+  leadsCount: number;
+  elapsedSeconds: number;
+}
+
+/** Détail par tâche (New, NRs, ...) pour un seul Sales sur une période, tâches sans activité incluses à 0. */
+export function buildTaskBreakdown(taskEntries: TaskEntry[]): TaskBreakdownRow[] {
+  const byKey = new Map<TaskKey, { count: number; accumulated: number }>();
+  for (const t of taskEntries) {
+    const cur = byKey.get(t.task_key) ?? { count: 0, accumulated: 0 };
+    cur.count += t.count ?? 0;
+    cur.accumulated += t.accumulated ?? 0;
+    byKey.set(t.task_key, cur);
+  }
+  return ALL_TASK_KEYS.map((key) => ({
+    taskKey: key,
+    label: taskLabel(key),
+    leadsCount: byKey.get(key)?.count ?? 0,
+    elapsedSeconds: byKey.get(key)?.accumulated ?? 0,
+  }));
+}
+
+export async function fetchTaskBreakdown(
+  supabase: SupabaseClient<Database>,
+  range: DateRange,
+  personId: string
+): Promise<TaskBreakdownRow[]> {
+  const { data, error } = await supabase
+    .from('task_entries')
+    .select('*')
+    .eq('person_id', personId)
+    .gte('date', range.from)
+    .lte('date', range.to);
+  if (error) throw error;
+  return buildTaskBreakdown(data ?? []);
 }
 
 export async function fetchPeriodReport(

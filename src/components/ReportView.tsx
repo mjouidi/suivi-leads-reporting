@@ -21,6 +21,7 @@ import type { Profile } from '@/lib/database.types';
 import { DateRangeFilter } from '@/components/DateRangeFilter';
 import { EmployeeFilter } from '@/components/EmployeeFilter';
 import { PersonSummaryTable } from '@/components/PersonSummaryTable';
+import { PersonTaskDetail } from '@/components/PersonTaskDetail';
 
 async function downloadExport(path: string, range: DateRange, personIds: string[] | null, preset: RangePreset) {
   const res = await fetch(path, {
@@ -172,6 +173,8 @@ export function ReportView({
           explicationTarget={explicationTargetForPreset(preset)}
         />
       </div>
+
+      <PersonTaskDetail profiles={profiles} />
     </div>
   );
 }
