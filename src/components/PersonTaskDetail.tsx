@@ -20,8 +20,12 @@ const TIME_TARGET_SECONDS_PER_DAY = 6 * 3600 + 30 * 60; // 6h30
 function tierForRatio(value: number, target: number): 'success' | 'amber' | 'danger' {
   const ratio = value / target;
   if (ratio >= 1) return 'success';
-  if (ratio >= 0.7) return 'amber';
+  if (ratio >= 0.8) return 'amber';
   return 'danger';
+}
+
+function pct(value: number, target: number): number {
+  return target > 0 ? Math.round((value / target) * 100) : 0;
 }
 
 export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
@@ -151,22 +155,31 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
         <div className="detail-summary-card">
           <h4 className="detail-summary-title">Résumé</h4>
           <div className={`detail-summary-row tone-${tierForRatio(modulesTraites, MODULE_TARGET)}`}>
-            <span className="detail-summary-label">Modules traités</span>
-            <span className="detail-summary-value">
-              {modulesTraites} / {MODULE_TARGET}
-            </span>
+            <div className="detail-summary-row-top">
+              <span className="detail-summary-label">Modules traités</span>
+              <span className="detail-summary-value">
+                {modulesTraites} / {MODULE_TARGET}
+              </span>
+            </div>
+            <span className="detail-summary-percent">{pct(modulesTraites, MODULE_TARGET)}%</span>
           </div>
           <div className={`detail-summary-row tone-${tierForRatio(totals.leadsCount, leadsTarget)}`}>
-            <span className="detail-summary-label">Leads traités</span>
-            <span className="detail-summary-value">
-              {totals.leadsCount} / {leadsTarget}
-            </span>
+            <div className="detail-summary-row-top">
+              <span className="detail-summary-label">Leads traités</span>
+              <span className="detail-summary-value">
+                {totals.leadsCount} / {leadsTarget}
+              </span>
+            </div>
+            <span className="detail-summary-percent">{pct(totals.leadsCount, leadsTarget)}%</span>
           </div>
           <div className={`detail-summary-row tone-${tierForRatio(totals.elapsedSeconds, timeTargetSeconds)}`}>
-            <span className="detail-summary-label">Temps écoulé</span>
-            <span className="detail-summary-value">
-              {fmtHHMMSS(totals.elapsedSeconds)} / {fmtHHMMSS(timeTargetSeconds)}
-            </span>
+            <div className="detail-summary-row-top">
+              <span className="detail-summary-label">Temps écoulé</span>
+              <span className="detail-summary-value">
+                {fmtHHMMSS(totals.elapsedSeconds)} / {fmtHHMMSS(timeTargetSeconds)}
+              </span>
+            </div>
+            <span className="detail-summary-percent">{pct(totals.elapsedSeconds, timeTargetSeconds)}%</span>
           </div>
         </div>
       </div>
