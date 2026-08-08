@@ -2,22 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { rangeForPreset } from '@/lib/dateRange';
+import { nDayPresetSpan, rangeForPreset, PRESET_LABELS } from '@/lib/dateRange';
 import { fetchTaskBreakdown, type TaskBreakdownRow } from '@/lib/report';
 import { fmtHHMMSS } from '@/lib/format';
 import type { Profile } from '@/lib/database.types';
 
-type DetailPreset = 'today' | 'twoDays' | 'threeDays';
+const DETAIL_PRESET_KEYS = ['today', 'twoDays', 'threeDays', 'fourDays', 'fiveDays', 'sixDays'] as const;
+type DetailPreset = (typeof DETAIL_PRESET_KEYS)[number];
 
-const DETAIL_PRESETS: { key: DetailPreset; label: string }[] = [
-  { key: 'today', label: "Aujourd'hui" },
-  { key: 'twoDays', label: '2 Jours' },
-  { key: 'threeDays', label: '3 Jours' },
-];
-
-// Objectifs de référence pour le résumé (fixes, indépendants de la période choisie).
-const MODULE_TARGET = 7;
-const LEADS_TARGET = 100;
+// Objectifs de référence pour le résumé. "Modules traités" et le temps sont fixes ;
+// "Leads traités" grimpe de 100/jour couvert par la période choisie (100, 200, ..., 600).
+const MODULE_TARGET = 10;
+const LEADS_TARGET_PER_DAY = 100;
 const TIME_TARGET_SECONDS = 6 * 3600 + 50 * 60; // 6h50
 
 function tierForRatio(value: number, target: number): 'success' | 'amber' | 'danger' {
@@ -67,6 +63,7 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
     { leadsCount: 0, elapsedSeconds: 0 }
   );
   const modulesTraites = rows.filter((r) => r.elapsedSeconds > 0 || r.leadsCount > 0).length;
+  const leadsTarget = (nDayPresetSpan(preset) ?? 1) * LEADS_TARGET_PER_DAY;
 
   return (
     <div className="panel">
@@ -93,14 +90,14 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
       <div className="filter-field" style={{ marginBottom: 14 }}>
         <label>Période</label>
         <div className="preset-group">
-          {DETAIL_PRESETS.map((p) => (
+          {DETAIL_PRESET_KEYS.map((p) => (
             <button
-              key={p.key}
+              key={p}
               type="button"
-              className={`preset-btn ${preset === p.key ? 'active' : ''}`}
-              onClick={() => setPreset(p.key)}
+              className={`preset-btn ${preset === p ? 'active' : ''}`}
+              onClick={() => setPreset(p)}
             >
-              {p.label}
+              {PRESET_LABELS[p]}
             </button>
           ))}
         </div>
@@ -156,10 +153,10 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
               {modulesTraites} / {MODULE_TARGET}
             </span>
           </div>
-          <div className={`detail-summary-row tone-${tierForRatio(totals.leadsCount, LEADS_TARGET)}`}>
+          <div className={`detail-summary-row tone-${tierForRatio(totals.leadsCount, leadsTarget)}`}>
             <span className="detail-summary-label">Leads traités</span>
             <span className="detail-summary-value">
-              {totals.leadsCount} / {LEADS_TARGET}
+              {totals.leadsCount} / {leadsTarget}
             </span>
           </div>
           <div className={`detail-summary-row tone-${tierForRatio(totals.elapsedSeconds, TIME_TARGET_SECONDS)}`}>
