@@ -135,7 +135,10 @@ export function buildTaskBreakdown(taskEntries: TaskEntry[]): TaskBreakdownRow[]
   const byKey = new Map<TaskKey, { count: number; accumulated: number }>();
   for (const t of taskEntries) {
     const cur = byKey.get(t.task_key) ?? { count: 0, accumulated: 0 };
-    cur.count += t.count ?? 0;
+    // La tâche "explication" ne remplit pas la colonne générique `count` : ses leads
+    // traités sont répartis dans explication_par_msg / explication_par_appel (voir
+    // buildPersonReport plus haut, même logique).
+    cur.count += t.task_key === 'explication' ? (t.explication_par_msg ?? 0) + (t.explication_par_appel ?? 0) : (t.count ?? 0);
     cur.accumulated += t.accumulated ?? 0;
     byKey.set(t.task_key, cur);
   }
