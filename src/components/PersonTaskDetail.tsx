@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { nDayPresetSpan, rangeForPreset, PRESET_LABELS } from '@/lib/dateRange';
-import { fetchTaskBreakdown, type TaskBreakdownRow } from '@/lib/report';
+import { fetchPersonTimeTotals, fetchTaskBreakdown, type TaskBreakdownRow } from '@/lib/report';
 import { fmtHHMMSS } from '@/lib/format';
 import type { Profile } from '@/lib/database.types';
 
@@ -32,6 +32,8 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(profiles[0]?.id ?? null);
   const [preset, setPreset] = useState<DetailPreset>('today');
   const [rows, setRows] = useState<TaskBreakdownRow[]>([]);
+  const [idleSeconds, setIdleSeconds] = useState(0);
+  const [closingSeconds, setClosingSeconds] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +44,15 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
       setLoading(true);
       const supabase = createClient();
       try {
-        const next = await fetchTaskBreakdown(supabase, rangeForPreset(preset), selectedId!);
+        const range = rangeForPreset(preset);
+        const [nextRows, timeTotals] = await Promise.all([
+          fetchTaskBreakdown(supabase, range, selectedId!),
+          fetchPersonTimeTotals(supabase, range, selectedId!),
+        ]);
         if (cancelled) return;
-        setRows(next);
+        setRows(nextRows);
+        setIdleSeconds(timeTotals.idleSeconds);
+        setClosingSeconds(timeTotals.closingSeconds);
         setError(null);
       } catch {
         if (!cancelled) setError('Impossible de charger le détail. Réessayez.');
@@ -180,6 +188,20 @@ export function PersonTaskDetail({ profiles }: { profiles: Profile[] }) {
               </span>
             </div>
             <span className="detail-summary-percent">{pct(totals.elapsedSeconds, timeTargetSeconds)}%</span>
+          </div>
+        </div>
+
+        <div className="time-pearls-card">
+          <div className="time-pearl tone-idle">
+            <span className="time-pearl-alert" aria-hidden>
+              !
+            </span>
+            <span className="time-pearl-label">Temps perdu</span>
+            <span className="time-pearl-value">{fmtHHMMSS(idleSeconds)}</span>
+          </div>
+          <div className="time-pearl tone-closing">
+            <span className="time-pearl-label">Temps de closing</span>
+            <span className="time-pearl-value">{fmtHHMMSS(closingSeconds)}</span>
           </div>
         </div>
       </div>

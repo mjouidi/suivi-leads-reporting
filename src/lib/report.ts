@@ -165,6 +165,30 @@ export async function fetchTaskBreakdown(
   return buildTaskBreakdown(data ?? []);
 }
 
+export interface PersonTimeTotals {
+  idleSeconds: number;
+  closingSeconds: number;
+}
+
+export async function fetchPersonTimeTotals(
+  supabase: SupabaseClient<Database>,
+  range: DateRange,
+  personId: string
+): Promise<PersonTimeTotals> {
+  const { data, error } = await supabase
+    .from('daily_entries')
+    .select('*')
+    .eq('person_id', personId)
+    .gte('date', range.from)
+    .lte('date', range.to);
+  if (error) throw error;
+  const rows = data ?? [];
+  return {
+    idleSeconds: rows.reduce((sum, d) => sum + d.idle_accumulated, 0),
+    closingSeconds: rows.reduce((sum, d) => sum + d.closing_accumulated, 0),
+  };
+}
+
 export async function fetchPeriodReport(
   supabase: SupabaseClient<Database>,
   range: DateRange,
