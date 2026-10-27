@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -16,17 +14,24 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      setError('Email ou mot de passe incorrect.');
+      if (signInError) {
+        setError('Email ou mot de passe incorrect.');
+        setLoading(false);
+        return;
+      }
+
+      // Navigation complète (pas router.push) : les cookies de session partent forcément
+      // avec la requête, et une erreur serveur s'affiche au lieu de laisser le bouton
+      // bloqué sur « Connexion… ».
+      window.location.assign('/rapports');
+    } catch {
+      setError('Connexion impossible. Vérifiez votre réseau et réessayez.');
       setLoading(false);
-      return;
     }
-
-    router.push('/');
-    router.refresh();
   }
 
   return (
